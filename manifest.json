@@ -1,0 +1,16 @@
+{
+  "name": "Meu Apê · Finanças NOW Milão",
+  "short_name": "Meu Apê",
+  "description": "Controle de pagamentos e despesas do apartamento NOW Milão 2ª Fase até a entrega das chaves.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FEF4EB",
+  "theme_color": "#FDA534",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

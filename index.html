@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<title>Meu Apê · NOW Milão</title>
+
+<!-- PWA / iOS home screen -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#FDA534">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Meu Apê">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" href="icons/icon-32.png">
+
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="bg-scene"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div></div>
+
+<div class="app-shell">
+
+  <!-- ===================== DASHBOARD ===================== -->
+  <section class="view active" id="view-dashboard">
+    <div class="topbar">
+      <div>
+        <div class="eyebrow" id="todayLabel">hoje</div>
+        <h1>Minhas finanças</h1>
+      </div>
+    </div>
+
+    <div class="glass card countdown-card">
+      <div class="ring">
+        <svg width="78" height="78" viewBox="0 0 78 78">
+          <circle cx="39" cy="39" r="33" fill="none" stroke="rgba(255,255,255,.5)" stroke-width="8"/>
+          <circle id="countdownRing" cx="39" cy="39" r="33" fill="none" stroke="#F9590B" stroke-width="8" stroke-linecap="round" stroke-dasharray="207" stroke-dashoffset="207"/>
+        </svg>
+        <div class="num"><b id="daysLeftNum">–</b><small>dias</small></div>
+      </div>
+      <div style="flex:1;">
+        <div class="stat-label">Faltam para a entrega das chaves</div>
+        <div class="stat-value" style="font-size:15px; margin-top:2px;">Previsão: <span id="deliveryDateLabel">31/05/2027</span></div>
+        <div class="progress-track" style="margin-top:10px;"><div class="progress-fill" id="timeProgressFill" style="width:0%"></div></div>
+        <div class="stat-sub" id="timeProgressLabel">obra em andamento</div>
+      </div>
+    </div>
+
+    <div class="glass card liquid-wrap">
+      <div class="liquid-tank">
+        <div class="fill" id="liquidFill">
+          <svg class="wave1" viewBox="0 0 200 24" preserveAspectRatio="none">
+            <path d="M0 14 Q 25 2, 50 14 T 100 14 T 150 14 T 200 14 V24 H0 Z" fill="#FB8A1E"/>
+          </svg>
+          <svg class="wave2" viewBox="0 0 200 24" preserveAspectRatio="none">
+            <path d="M0 16 Q 25 6, 50 16 T 100 16 T 150 16 T 200 16 V24 H0 Z" fill="#E04400"/>
+          </svg>
+          <div class="body-fill" style="background:#F9590B;"></div>
+        </div>
+        <div class="pct"><span class="num" id="pctPaidNum">0%</span><span class="lbl">do valor<br>contratado</span></div>
+      </div>
+      <div style="flex:1; display:flex; flex-direction:column; gap:10px;">
+        <div>
+          <div class="stat-label">Total pago até hoje</div>
+          <div class="stat-value big" id="totalPaidNum">R$ 0,00</div>
+        </div>
+        <div>
+          <div class="stat-label">Previsto (valor contratado)</div>
+          <div class="stat-value" style="font-size:16px;" id="totalRefNum">R$ 0,00</div>
+        </div>
+        <div>
+          <div class="stat-label">Diferença</div>
+          <div class="stat-value" style="font-size:16px;" id="totalDiffNum">R$ 0,00</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title">Visão geral</div>
+
+    <div class="glass card chart-card">
+      <h3>Pago por categoria</h3>
+      <div class="chart-box"><canvas id="chartByCategory"></canvas></div>
+      <div class="legend-list" id="legendByCategory"></div>
+    </div>
+
+    <div class="glass card chart-card">
+      <h3>Acumulado: pago x previsto até a entrega</h3>
+      <div class="chart-box tall"><canvas id="chartTimeline"></canvas></div>
+    </div>
+
+    <div class="glass card chart-card">
+      <h3>Pago x previsto por categoria</h3>
+      <div class="chart-box tall"><canvas id="chartBars"></canvas></div>
+    </div>
+
+    <div class="section-title">Últimos lançamentos</div>
+    <div class="glass card" id="recentEntriesCard" style="padding:6px 14px;">
+      <!-- preenchido via JS -->
+    </div>
+  </section>
+
+  <!-- ===================== LANÇAMENTOS ===================== -->
+  <section class="view" id="view-entries">
+    <div class="topbar">
+      <div>
+        <div class="eyebrow">Extrato</div>
+        <h1>Lançamentos</h1>
+      </div>
+    </div>
+
+    <div class="glass card" style="padding:14px 16px;">
+      <div class="field" style="margin-bottom:0;">
+        <label>Filtrar por categoria</label>
+        <select id="filterCategory"><option value="">Todas as categorias</option></select>
+      </div>
+    </div>
+
+    <div id="entriesList"></div>
+  </section>
+
+  <!-- ===================== CATEGORIAS ===================== -->
+  <section class="view" id="view-categories">
+    <div class="topbar">
+      <div>
+        <div class="eyebrow">Plano de pagamento</div>
+        <h1>Categorias</h1>
+      </div>
+      <button class="icon-btn" id="btnAddCategoryTop" aria-label="Nova categoria">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+      </button>
+    </div>
+    <div id="categoriesList"></div>
+  </section>
+
+  <!-- ===================== AJUSTES ===================== -->
+  <section class="view" id="view-settings">
+    <div class="topbar">
+      <div>
+        <div class="eyebrow">Configurações</div>
+        <h1>Ajustes</h1>
+      </div>
+    </div>
+
+    <div class="glass card brand-mark">
+      <img src="icons/icon-192.png" alt="ícone do app">
+      <div>
+        <div class="name">Meu Apê · NOW Milão</div>
+        <div class="sub">Unidade 202F · Bloco F · Goiânia/GO</div>
+      </div>
+    </div>
+
+    <div class="section-title">Dados do imóvel</div>
+    <div class="glass card">
+      <div class="field">
+        <label>Data prevista de entrega das chaves (Habite-se)</label>
+        <input type="date" id="settingDeliveryDate">
+      </div>
+      <div class="field">
+        <label>Data da compra (assinatura do contrato)</label>
+        <input type="date" id="settingPurchaseDate">
+      </div>
+      <div class="field" style="margin-bottom:0;">
+        <label>Valor total do contrato (referência)</label>
+        <input type="number" inputmode="decimal" step="0.01" id="settingPropertyValue">
+        <div class="hint">Usado só como referência — os valores reais têm reajuste mensal (INCC/IPCA) e podem variar.</div>
+      </div>
+    </div>
+
+    <div class="section-title">Dados e backup</div>
+    <div class="glass card" style="padding:8px 16px;">
+      <div class="kv-row">
+        <div class="k">Exportar backup (.json)</div>
+        <button class="btn btn-glass btn-sm" id="btnExportJson">Exportar</button>
+      </div>
+      <div class="kv-row">
+        <div class="k">Importar backup (.json)</div>
+        <button class="btn btn-glass btn-sm" id="btnImportJson">Importar</button>
+      </div>
+      <div class="kv-row">
+        <div class="k">Exportar relatório (.csv)</div>
+        <button class="btn btn-glass btn-sm" id="btnExportCsv">Exportar</button>
+      </div>
+      <div class="kv-row">
+        <div class="k" style="color:var(--bad);">Apagar todos os dados</div>
+        <button class="btn btn-danger btn-sm" id="btnResetAll">Apagar</button>
+      </div>
+    </div>
+    <input type="file" id="fileImportJson" accept="application/json" style="display:none;">
+
+    <div class="section-title">Sobre</div>
+    <div class="glass card">
+      <p style="font-size:13.5px; color:var(--ink-700); line-height:1.5;">
+        Este app guarda todas as informações <b>somente neste aparelho/navegador</b> (não existe login nem nuvem).
+        Faça backups periódicos em <b>Exportar backup</b> para não perder seus lançamentos se limpar os dados do Safari
+        ou trocar de celular. No fim da obra, use <b>Exportar relatório</b> para gerar a planilha completa do que foi pago.
+      </p>
+      <p style="font-size:11.5px; color:var(--ink-500); margin-top:10px;">v1.0 · feito para acompanhar o NOW Milão 2ª Fase</p>
+    </div>
+  </section>
+
+</div>
+
+<!-- FAB -->
+<button class="fab" id="fabAdd" aria-label="Adicionar">
+  <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+</button>
+
+<!-- Tab bar -->
+<nav class="tabbar">
+  <button class="tab-btn active" data-view="view-dashboard">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v9a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1v-9"/></svg>
+    <span>Início</span>
+  </button>
+  <button class="tab-btn" data-view="view-entries">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6h11"/><path d="M9 12h11"/><path d="M9 18h11"/><circle cx="4.5" cy="6" r="1.3" fill="currentColor" stroke="none"/><circle cx="4.5" cy="12" r="1.3" fill="currentColor" stroke="none"/><circle cx="4.5" cy="18" r="1.3" fill="currentColor" stroke="none"/></svg>
+    <span>Lançamentos</span>
+  </button>
+  <button class="tab-btn" data-view="view-categories">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="7" height="7" rx="2"/><rect x="13.5" y="3.5" width="7" height="7" rx="2"/><rect x="3.5" y="13.5" width="7" height="7" rx="2"/><rect x="13.5" y="13.5" width="7" height="7" rx="2"/></svg>
+    <span>Categorias</span>
+  </button>
+  <button class="tab-btn" data-view="view-settings">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 13a7.97 7.97 0 0 0 0-2l1.6-1.4-1.6-2.8-2 .6a8 8 0 0 0-1.7-1l-.3-2.1h-3.2l-.3 2.1a8 8 0 0 0-1.7 1l-2-.6L6.6 9.6 8.2 11a7.97 7.97 0 0 0 0 2l-1.6 1.4 1.6 2.8 2-.6a8 8 0 0 0 1.7 1l.3 2.1h3.2l.3-2.1a8 8 0 0 0 1.7-1l2 .6 1.6-2.8L19.4 13Z"/></svg>
+    <span>Ajustes</span>
+  </button>
+</nav>
+
+<!-- Sheet backdrop -->
+<div class="sheet-backdrop" id="sheetBackdrop"></div>
+
+<!-- Sheet: novo/editar lançamento -->
+<div class="sheet" id="sheetEntry">
+  <div class="grabber"></div>
+  <div class="sheet-head">
+    <h2 id="entrySheetTitle">Novo lançamento</h2>
+    <button class="icon-btn" data-close-sheet><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+  </div>
+  <input type="hidden" id="entryId">
+  <div class="field">
+    <label>Categoria</label>
+    <select id="entryCategory"></select>
+  </div>
+  <div class="field-row">
+    <div class="field">
+      <label>Data do pagamento</label>
+      <input type="date" id="entryDate">
+    </div>
+    <div class="field">
+      <label>Valor pago (R$)</label>
+      <input type="number" inputmode="decimal" step="0.01" placeholder="0,00" id="entryValue">
+    </div>
+  </div>
+  <div class="field">
+    <label>Forma de pagamento</label>
+    <select id="entryMethod">
+      <option value="PIX">PIX</option>
+      <option value="Boleto">Boleto</option>
+      <option value="Transferência">Transferência</option>
+      <option value="Cartão">Cartão</option>
+      <option value="Dinheiro">Dinheiro</option>
+      <option value="Outro">Outro</option>
+    </select>
+  </div>
+  <div class="field">
+    <label>Observação (opcional)</label>
+    <textarea id="entryNote" rows="2" placeholder="Ex: parcela 4/13, paguei com 2 dias de atraso..."></textarea>
+  </div>
+  <button class="btn btn-primary btn-block" id="btnSaveEntry">Salvar lançamento</button>
+  <button class="btn btn-danger btn-block" id="btnDeleteEntry" style="margin-top:10px; display:none;">Excluir lançamento</button>
+</div>
+
+<!-- Sheet: nova/editar categoria -->
+<div class="sheet" id="sheetCategory">
+  <div class="grabber"></div>
+  <div class="sheet-head">
+    <h2 id="categorySheetTitle">Nova categoria</h2>
+    <button class="icon-btn" data-close-sheet><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+  </div>
+  <input type="hidden" id="categoryId">
+  <div class="field">
+    <label>Nome da categoria</label>
+    <input type="text" id="categoryName" placeholder="Ex: Vistoria do imóvel">
+  </div>
+  <div class="field">
+    <label>Grupo</label>
+    <select id="categoryGroup"></select>
+  </div>
+  <div class="field-row">
+    <div class="field">
+      <label>Valor de referência (opcional)</label>
+      <input type="number" inputmode="decimal" step="0.01" placeholder="0,00" id="categoryRef">
+    </div>
+    <div class="field">
+      <label>Vencimento (opcional)</label>
+      <input type="date" id="categoryDue">
+    </div>
+  </div>
+  <div class="field" id="categoryModeField" style="display:none;">
+    <label>Como esse pagamento será feito?</label>
+    <div class="seg" id="categoryModeSeg">
+      <button type="button" data-mode="pendente" class="active">A decidir</button>
+      <button type="button" data-mode="avista">À vista</button>
+      <button type="button" data-mode="parcelado">Parcelado</button>
+    </div>
+    <div class="hint">No contrato, o pró-soluto final pode ser pago à vista na entrega ou parcelado em até 48x, se você cumprir os requisitos do contrato.</div>
+  </div>
+  <div class="field" style="margin-bottom:0;">
+    <label>Observação (opcional)</label>
+    <textarea id="categoryNote" rows="2" placeholder="Notas sobre essa categoria..."></textarea>
+  </div>
+  <button class="btn btn-primary btn-block" id="btnSaveCategory" style="margin-top:14px;">Salvar categoria</button>
+  <button class="btn btn-danger btn-block" id="btnDeleteCategory" style="margin-top:10px; display:none;">Excluir categoria</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
