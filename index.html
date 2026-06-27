@@ -60,7 +60,7 @@
           </svg>
           <div class="body-fill" style="background:#F9590B;"></div>
         </div>
-        <div class="pct"><span class="num" id="pctPaidNum">0%</span><span class="lbl">do valor<br>contratado</span></div>
+        <div class="pct"><span class="badge"><span class="num" id="pctPaidNum">0%</span><span class="lbl">do valor<br>contratado</span></span></div>
       </div>
       <div style="flex:1; display:flex; flex-direction:column; gap:10px;">
         <div>
@@ -147,13 +147,24 @@
     <div class="glass card brand-mark">
       <img src="icons/icon-192.png" alt="ícone do app">
       <div>
-        <div class="name">Home Check</div>
-        <div class="sub">Controle de pagamentos do seu imóvel até a entrega</div>
+        <div class="name" id="brandName">Home Check</div>
+        <div class="sub" id="brandSub">Controle de pagamentos do seu imóvel até a entrega</div>
       </div>
     </div>
 
     <div class="section-title">Identificação do imóvel</div>
-    <div class="glass card">
+
+    <!-- resumo: aparece quando já tem nome/endereço salvos -->
+    <div class="glass card kv-row" id="identitySummaryCard" style="display:none; padding:16px 18px; border-bottom:none;">
+      <div style="min-width:0;">
+        <div class="k" id="identitySummaryName">—</div>
+        <div class="v" id="identitySummaryAddress"></div>
+      </div>
+      <button class="btn btn-glass btn-sm" id="btnEditIdentity">Editar</button>
+    </div>
+
+    <!-- edição: aparece no primeiro uso, ou ao tocar em "Editar" -->
+    <div class="glass card" id="identityEditCard">
       <div class="field">
         <label>Nome do imóvel (opcional)</label>
         <input type="text" id="settingPropertyName" placeholder="Ex: Meu Apê, Casa Nova, Reserva do Lago...">
@@ -163,6 +174,7 @@
         <input type="text" id="settingPropertyAddress" placeholder="Ex: Unidade 12B, Bloco 2, Cidade/UF">
         <div class="hint">Esses dados ficam só neste aparelho — não são enviados a lugar nenhum.</div>
       </div>
+      <button class="btn btn-primary btn-block" id="btnDoneIdentity" style="margin-top:14px;">Concluir</button>
     </div>
 
     <div class="section-title">Dados do imóvel</div>

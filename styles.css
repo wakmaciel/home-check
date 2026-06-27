@@ -234,13 +234,21 @@ input,select,textarea{ font-family: inherit; }
 }
 @keyframes waveMove{ from{ transform: translateX(0); } to{ transform: translateX(-50%); } }
 .liquid-tank .pct{
-  position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;
-  text-align:center; z-index:3;
+  position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  text-align:center; z-index:3; padding:10px;
 }
-/* usa --tank-text (não --ink-900): esse número sempre fica em cima do líquido
-   laranja vivo, então o contraste precisa ser fixo nos dois temas, não inverter */
-.liquid-tank .pct .num{ font-family:var(--font-display); font-weight:800; font-size:28px; color:var(--tank-text); text-shadow: 0 1px 8px rgba(255,255,255,.8);}
-.liquid-tank .pct .lbl{ font-size:9.5px; font-weight:700; color: var(--tank-text-sub); text-transform:uppercase; letter-spacing:.04em; text-shadow:0 1px 6px rgba(255,255,255,.7);}
+/* O número precisa ficar legível tanto sobre o vidro vazio (claro OU escuro)
+   quanto sobre o líquido laranja vivo — em vez de tentar achar uma cor de texto
+   que funcione nos três casos, colocamos uma pequena pílula sólida por baixo,
+   que garante contraste sempre, independente do tema e do nível do líquido. */
+.liquid-tank .pct .badge{
+  display:flex; flex-direction:column; align-items:center; max-width:100%;
+  background: rgba(255,250,245,.94);
+  border-radius:16px; padding:8px 14px 9px;
+  box-shadow: 0 3px 12px rgba(0,0,0,.22);
+}
+.liquid-tank .pct .num{ font-family:var(--font-display); font-weight:800; font-size:24px; line-height:1; color:var(--tank-text); }
+.liquid-tank .pct .lbl{ font-size:8.5px; font-weight:700; color:var(--tank-text-sub); text-transform:uppercase; letter-spacing:.04em; line-height:1.25; margin-top:3px; }
 
 /* ---------- barra de progresso ---------- */
 .progress-track{ height:10px; border-radius:99px; background: rgba(255,255,255,.45); overflow:hidden; border:1px solid rgba(255,255,255,.6); }

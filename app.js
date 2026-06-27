@@ -701,19 +701,45 @@ function renderSettings(){
   $('#settingDeliveryDate').value = state.settings.deliveryDate;
   $('#settingPurchaseDate').value = state.settings.purchaseDate;
   $('#settingPropertyValue').value = state.settings.propertyValue ?? '';
+  renderBrandMark();
+  renderIdentitySection();
 }
 
-function bindSettingInput(id, key, isNumber){
+function renderBrandMark(){
+  const name = state.settings.propertyName ? `Home Check · ${state.settings.propertyName}` : 'Home Check';
+  const sub = state.settings.propertyAddress || 'Controle de pagamentos do seu imóvel até a entrega';
+  $('#brandName').textContent = name;
+  $('#brandSub').textContent = sub;
+}
+
+// Quando o nome/endereço já estão preenchidos, mostramos um resumo (com botão
+// "Editar") em vez de deixar os campos soltos sempre abertos na tela.
+let editingPropertyInfo = false;
+function renderIdentitySection(){
+  const hasIdentity = !!(state.settings.propertyName || state.settings.propertyAddress);
+  const showSummary = hasIdentity && !editingPropertyInfo;
+  $('#identitySummaryCard').style.display = showSummary ? 'flex' : 'none';
+  $('#identityEditCard').style.display = showSummary ? 'none' : 'block';
+  if(showSummary){
+    $('#identitySummaryName').textContent = state.settings.propertyName || 'Imóvel sem nome';
+    $('#identitySummaryAddress').textContent = state.settings.propertyAddress || 'Sem endereço definido';
+  }
+}
+$('#btnEditIdentity').addEventListener('click', () => { editingPropertyInfo = true; renderIdentitySection(); });
+$('#btnDoneIdentity').addEventListener('click', () => { editingPropertyInfo = false; renderIdentitySection(); });
+
+function bindSettingInput(id, key, isNumber, onAfter){
   $('#'+id).addEventListener('change', (ev) => {
     let v = ev.target.value;
     if(isNumber) v = v === '' ? null : (parseFloat(v) || 0);
     state.settings[key] = v;
     saveState();
     toast('Ajuste salvo.');
+    if(onAfter) onAfter();
   });
 }
-bindSettingInput('settingPropertyName', 'propertyName', false);
-bindSettingInput('settingPropertyAddress', 'propertyAddress', false);
+bindSettingInput('settingPropertyName', 'propertyName', false, renderBrandMark);
+bindSettingInput('settingPropertyAddress', 'propertyAddress', false, renderBrandMark);
 bindSettingInput('settingDeliveryDate', 'deliveryDate', false);
 bindSettingInput('settingPurchaseDate', 'purchaseDate', false);
 bindSettingInput('settingPropertyValue', 'propertyValue', true);
