@@ -1,13 +1,13 @@
 /* ===================================================================
-   NOW Milão · Finanças do Apê — app.js
+   Home Check — app.js
    App 100% local: tudo fica salvo no localStorage do navegador/aparelho.
    =================================================================== */
 
-const STORAGE_KEY = 'nowmilao_financas_v1';
+const STORAGE_KEY = 'homecheck_financas_v1';
 
 const GROUPS = [
   { id: 'sinal',        label: 'Sinal e Entrada (Incorporadora)' },
-  { id: 'financiamento',label: 'Financiamento / Seguro de Obra (Caixa)' },
+  { id: 'financiamento',label: 'Financiamento / Seguro de Obra' },
   { id: 'balao',        label: 'Balões (Pró-Soluto)' },
   { id: 'posChaves',    label: 'Pós-Chaves (Pró-Soluto Final)' },
   { id: 'taxas',        label: 'Taxas e Registros' },
@@ -23,30 +23,42 @@ const GROUP_COLORS = {
   outros:       '#8C6A4C',
 };
 
-const PALETTE = ['#FDA534','#FB8A1E','#F9590B','#E04400','#B83600','#8C6A4C','#6B4326','#C24700','#FFC988','#3A2410'];
-
+// Categorias-modelo: cobrem o ciclo comum de uma compra de imóvel na planta
+// (sinal, parcelas até as chaves, financiamento e taxas), mas SEM nenhum valor,
+// data ou dado específico preenchido — cada pessoa configura com o próprio
+// contrato em Categorias, e os "Valores de referência" são opcionais.
 function defaultCategories(){
   return [
-    { id:'sinal-ato', name:'Sinal (à vista)', group:'sinal', referenceValue:6610.25, dueDate:'2026-04-27', recurring:false, note:'Pago via PIX na assinatura do contrato.' },
-    { id:'parc-mensal', name:'Parcelas mensais (13x) — Pró-Soluto', group:'sinal', referenceValue:13000.00, dueDate:'2027-05-25', recurring:true, recurStart:'2026-05-25', recurEnd:'2027-05-25', note:'13 parcelas de R$ 1.000,00, vencendo todo dia 25.' },
-    { id:'juros-obra', name:'Seguro / Juros de obra (mensal)', group:'financiamento', referenceValue:null, recurring:true, recurStart:'2026-04-27', recurEnd:'2027-05-31', note:'Cobrado mensalmente pela Caixa a partir da assinatura do financiamento. Valor varia, lance o que pagar a cada mês.' },
-    { id:'saldo-financ', name:'Saldo do preço (Financiamento MCMV)', group:'financiamento', referenceValue:274189.75, dueDate:'2026-07-26', recurring:false, note:'Pago via financiamento bancário / adesão ao programa.' },
-    { id:'balao-anual', name:'Parcela anual — Pró-Soluto', group:'balao', referenceValue:65000.00, dueDate:'2026-12-20', recurring:false, note:'Balão anual único.' },
-    { id:'balao-final', name:'Parcela única (final) — Pró-Soluto', group:'balao', referenceValue:31200.00, dueDate:'2027-05-30', recurring:false, note:'Pode virar parcelamento de até 48x se os requisitos do contrato forem cumpridos.' },
+    { id:'sinal-ato', name:'Sinal (à vista)', group:'sinal', referenceValue:null, dueDate:null, recurring:false, note:'Valor de entrada pago na assinatura do contrato.' },
+    { id:'parc-mensal', name:'Parcelas mensais da entrada', group:'sinal', referenceValue:null, dueDate:null, recurring:true, recurStart:null, recurEnd:null, note:'Parcelas cobradas pela incorporadora durante a obra, como parte da entrada.' },
+    { id:'juros-obra', name:'Seguro / Juros de obra (mensal)', group:'financiamento', referenceValue:null, dueDate:null, recurring:true, recurStart:null, recurEnd:null, note:'Cobrado mensalmente pelo banco a partir da assinatura do financiamento, enquanto a obra não termina. Também chamado de "taxa de obra" ou "fase de obra".' },
+    { id:'saldo-financ', name:'Saldo do preço (financiamento)', group:'financiamento', referenceValue:null, dueDate:null, recurring:false, note:'Parte paga via financiamento bancário e/ou recursos próprios.' },
+    { id:'balao-anual', name:'Parcela anual (balão)', group:'balao', referenceValue:null, dueDate:null, recurring:false, note:'Parcela única anual, comum em contratos de compra na planta.' },
+    { id:'balao-final', name:'Parcela única / balão final', group:'balao', referenceValue:null, dueDate:null, recurring:false, note:'Costuma ser a maior parcela antes ou na entrega das chaves. Pode virar parcelamento, dependendo do contrato.' },
     { id:'pos-chaves-final', name:'Pró-Soluto pós-chaves (saldo)', group:'posChaves', referenceValue:null, mode:'pendente', recurring:false, note:'Defina aqui, no dia, se vai pagar à vista ou parcelado.' },
-    { id:'itbi', name:'ITBI', group:'taxas', referenceValue:null, recurring:false, note:'Prazo curto após assinatura do financiamento — atraso gera multa diária.' },
-    { id:'cartorio', name:'Taxas Cartorárias / Registro', group:'taxas', referenceValue:null, recurring:false },
-    { id:'outras', name:'Outras despesas', group:'outros', referenceValue:null, recurring:false, note:'Advogado, vistoria, mudança, decoração, etc.' },
+    { id:'itbi', name:'ITBI', group:'taxas', referenceValue:null, dueDate:null, recurring:false, note:'Imposto de Transmissão de Bens Imóveis. Confira o prazo no seu contrato — atraso costuma gerar multa diária.' },
+    { id:'cartorio', name:'Taxas Cartorárias / Registro', group:'taxas', referenceValue:null, dueDate:null, recurring:false, note:'Emolumentos e taxas do Cartório de Registro de Imóveis.' },
+    { id:'outras', name:'Outras despesas', group:'outros', referenceValue:null, dueDate:null, recurring:false, note:'Advogado, vistoria, mudança, decoração, etc.' },
   ];
+}
+
+// Data de entrega "placeholder": hoje + 24 meses. É só um valor inicial razoável
+// pra nada quebrar antes da pessoa configurar a data real do contrato dela em Ajustes.
+function placeholderDeliveryDate(){
+  const d = new Date();
+  d.setMonth(d.getMonth() + 24);
+  return d.toISOString().slice(0,10);
 }
 
 function defaultState(){
   return {
     schemaVersion: 1,
     settings: {
-      deliveryDate: '2027-05-31',
-      purchaseDate: '2026-04-27',
-      propertyValue: 390000.00,
+      propertyName: '',
+      propertyAddress: '',
+      deliveryDate: placeholderDeliveryDate(),
+      purchaseDate: todayISO(),
+      propertyValue: null,
     },
     categories: defaultCategories(),
     entries: [],
@@ -98,6 +110,26 @@ function addMonthsToKey(key, n){
 
 function categoryById(id){ return state.categories.find(c => c.id === id); }
 function groupLabel(id){ const g = GROUPS.find(g=>g.id===id); return g ? g.label : id; }
+
+/* ---------------- tema (claro/escuro) ---------------- */
+function cssVar(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+function isDarkMode(){ return !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches); }
+
+// As cores de DADOS (categorias) ficam vivas nos dois temas — só trocamos por uma
+// variante um pouco mais clara no escuro, pra nenhuma fatia "desaparecer" contra
+// o fundo escuro. As cores de CHROME (grade, eixos, bordas) vêm direto do CSS.
+const PALETTE_LIGHT = ['#FDA534','#FB8A1E','#F9590B','#E04400','#B83600','#8C6A4C','#6B4326','#C24700','#FFC988','#3A2410'];
+const PALETTE_DARK  = ['#FFB04D','#FF9A3D','#FF7A1E','#FF5A1A','#E0540D','#D9A974','#C9824E','#FF8C42','#FFD9A6','#E8B27A'];
+function palette(){ return isDarkMode() ? PALETTE_DARK : PALETTE_LIGHT; }
+function chartTheme(){
+  return {
+    grid: cssVar('--chart-grid'),
+    text: cssVar('--ink-700'),
+    sliceBorder: cssVar('--cream'),
+    mutedFill: cssVar('--chart-muted-fill'),
+    plannedLine: cssVar('--chart-planned-line'),
+  };
+}
 
 /* ---------------- estatísticas / cálculos ---------------- */
 function computeStats(){
@@ -240,18 +272,25 @@ function renderDashboard(){
     ? `${Math.round(frac*100)}% do prazo até a entrega já passou`
     : 'data prevista de entrega já alcançada';
 
-  const totalRefForPct = stats.totalRef || state.settings.propertyValue || 1;
+  const totalRefRaw = stats.totalRef || state.settings.propertyValue || 0;
+  const totalRefForPct = totalRefRaw || 1;
   const pct = clamp(stats.totalPaid / totalRefForPct, 0, 1.3);
   $('#liquidFill').style.height = Math.min(pct,1)*100 + '%';
   $('#pctPaidNum').textContent = Math.round(pct*100) + '%';
 
   $('#totalPaidNum').textContent = money(stats.totalPaid);
-  $('#totalRefNum').textContent = money(stats.totalRef || state.settings.propertyValue);
-  const diff = stats.totalPaid - (stats.totalRef || state.settings.propertyValue);
   const diffEl = $('#totalDiffNum');
-  diffEl.textContent = (diff>=0 ? '+ ' : '− ') + money(Math.abs(diff));
-  diffEl.classList.remove('good','bad');
-  diffEl.classList.add(diff > 0 ? 'bad' : 'good');
+  if(totalRefRaw > 0){
+    $('#totalRefNum').textContent = money(totalRefRaw);
+    const diff = stats.totalPaid - totalRefRaw;
+    diffEl.textContent = (diff>=0 ? '+ ' : '− ') + money(Math.abs(diff));
+    diffEl.classList.remove('good','bad');
+    diffEl.classList.add(diff > 0 ? 'bad' : 'good');
+  } else {
+    $('#totalRefNum').textContent = 'Defina em Ajustes';
+    diffEl.textContent = '—';
+    diffEl.classList.remove('good','bad');
+  }
 
   renderRecentEntries();
   renderChartByCategory(stats);
@@ -292,20 +331,22 @@ function renderChartByCategory(stats){
   const cats = state.categories.filter(c => (stats.byCategoryPaid[c.id]||0) > 0);
   const data = cats.map(c => stats.byCategoryPaid[c.id]);
   const labels = cats.map(c => c.name);
-  const colors = cats.map((c,i) => PALETTE[i % PALETTE.length]);
+  const pal = palette();
+  const colors = cats.map((c,i) => pal[i % pal.length]);
+  const theme = chartTheme();
 
   const ctx = $('#chartByCategory').getContext('2d');
   if(charts.byCategory) charts.byCategory.destroy();
 
   if(cats.length === 0){
     $('#legendByCategory').innerHTML = '<span class="hint">Nenhum pagamento lançado ainda.</span>';
-    charts.byCategory = new Chart(ctx, { type:'doughnut', data:{ labels:['Sem dados'], datasets:[{data:[1], backgroundColor:['rgba(140,106,76,.18)']}] }, options:{ plugins:{ legend:{display:false}, tooltip:{enabled:false} }, cutout:'68%' } });
+    charts.byCategory = new Chart(ctx, { type:'doughnut', data:{ labels:['Sem dados'], datasets:[{data:[1], backgroundColor:[theme.mutedFill]}] }, options:{ plugins:{ legend:{display:false}, tooltip:{enabled:false} }, cutout:'68%' } });
     return;
   }
 
   charts.byCategory = new Chart(ctx, {
     type: 'doughnut',
-    data: { labels, datasets:[{ data, backgroundColor:colors, borderWidth:2, borderColor:'#FEF4EB' }] },
+    data: { labels, datasets:[{ data, backgroundColor:colors, borderWidth:2, borderColor:theme.sliceBorder }] },
     options: {
       cutout:'68%',
       plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label: c => `${c.label}: ${money(c.raw)}` } } }
@@ -319,6 +360,7 @@ function renderChartByCategory(stats){
 
 function renderChartTimeline(stats){
   const tl = computeTimeline(stats);
+  const theme = chartTheme();
   const ctx = $('#chartTimeline').getContext('2d');
   if(charts.timeline) charts.timeline.destroy();
 
@@ -332,17 +374,17 @@ function renderChartTimeline(stats){
           fill:true, tension:.3, pointRadius:2, borderWidth:3
         },
         {
-          label:'Previsto (contrato)', data: tl.plannedCum, borderColor:'#8C6A4C', backgroundColor:'transparent',
+          label:'Previsto (contrato)', data: tl.plannedCum, borderColor: theme.plannedLine, backgroundColor:'transparent',
           borderDash:[6,5], fill:false, tension:.3, pointRadius:0, borderWidth:2
         }
       ]
     },
     options:{
       interaction:{ mode:'index', intersect:false },
-      plugins:{ legend:{ position:'bottom', labels:{ boxWidth:10, font:{size:11} } }, tooltip:{ callbacks:{ label: c => `${c.dataset.label}: ${money(c.raw)}` } } },
+      plugins:{ legend:{ position:'bottom', labels:{ boxWidth:10, font:{size:11}, color: theme.text } }, tooltip:{ callbacks:{ label: c => `${c.dataset.label}: ${money(c.raw)}` } } },
       scales:{
-        y:{ ticks:{ callback:v => 'R$ ' + (v/1000).toFixed(0)+'k', font:{size:10} }, grid:{ color:'rgba(140,106,76,.12)' } },
-        x:{ ticks:{ font:{size:10} }, grid:{ display:false } }
+        y:{ ticks:{ callback:v => 'R$ ' + (v/1000).toFixed(0)+'k', font:{size:10}, color: theme.text }, grid:{ color: theme.grid } },
+        x:{ ticks:{ font:{size:10}, color: theme.text }, grid:{ display:false } }
       }
     }
   });
@@ -350,6 +392,7 @@ function renderChartTimeline(stats){
 
 function renderChartBars(stats){
   const cats = state.categories.filter(c => c.referenceValue || stats.byCategoryPaid[c.id] > 0);
+  const theme = chartTheme();
   const ctx = $('#chartBars').getContext('2d');
   if(charts.bars) charts.bars.destroy();
 
@@ -364,15 +407,15 @@ function renderChartBars(stats){
       labels: cats.map(c=>c.name),
       datasets:[
         { label:'Pago', data: cats.map(c=>stats.byCategoryPaid[c.id]||0), backgroundColor:'#F9590B', borderRadius:6 },
-        { label:'Previsto', data: cats.map(c=> c.referenceValue || 0), backgroundColor:'rgba(140,106,76,.35)', borderRadius:6 },
+        { label:'Previsto', data: cats.map(c=> c.referenceValue || 0), backgroundColor: theme.mutedFill, borderRadius:6 },
       ]
     },
     options:{
       indexAxis:'y',
-      plugins:{ legend:{ position:'bottom', labels:{ boxWidth:10, font:{size:11} } }, tooltip:{ callbacks:{ label: c => `${c.dataset.label}: ${money(c.raw)}` } } },
+      plugins:{ legend:{ position:'bottom', labels:{ boxWidth:10, font:{size:11}, color: theme.text } }, tooltip:{ callbacks:{ label: c => `${c.dataset.label}: ${money(c.raw)}` } } },
       scales:{
-        x:{ ticks:{ callback:v=>'R$ '+(v/1000).toFixed(0)+'k', font:{size:10} }, grid:{ color:'rgba(140,106,76,.12)' } },
-        y:{ ticks:{ font:{size:10.5} }, grid:{ display:false } }
+        x:{ ticks:{ callback:v=>'R$ '+(v/1000).toFixed(0)+'k', font:{size:10}, color: theme.text }, grid:{ color: theme.grid } },
+        y:{ ticks:{ font:{size:10.5}, color: theme.text }, grid:{ display:false } }
       }
     }
   });
@@ -653,27 +696,31 @@ $('#btnDeleteCategory').addEventListener('click', () => {
    AJUSTES
    =================================================================== */
 function renderSettings(){
+  $('#settingPropertyName').value = state.settings.propertyName || '';
+  $('#settingPropertyAddress').value = state.settings.propertyAddress || '';
   $('#settingDeliveryDate').value = state.settings.deliveryDate;
   $('#settingPurchaseDate').value = state.settings.purchaseDate;
-  $('#settingPropertyValue').value = state.settings.propertyValue;
+  $('#settingPropertyValue').value = state.settings.propertyValue ?? '';
 }
 
 function bindSettingInput(id, key, isNumber){
   $('#'+id).addEventListener('change', (ev) => {
     let v = ev.target.value;
-    if(isNumber) v = parseFloat(v) || 0;
+    if(isNumber) v = v === '' ? null : (parseFloat(v) || 0);
     state.settings[key] = v;
     saveState();
     toast('Ajuste salvo.');
   });
 }
+bindSettingInput('settingPropertyName', 'propertyName', false);
+bindSettingInput('settingPropertyAddress', 'propertyAddress', false);
 bindSettingInput('settingDeliveryDate', 'deliveryDate', false);
 bindSettingInput('settingPurchaseDate', 'purchaseDate', false);
 bindSettingInput('settingPropertyValue', 'propertyValue', true);
 
 $('#btnExportJson').addEventListener('click', () => {
   const blob = new Blob([JSON.stringify(state, null, 2)], { type:'application/json' });
-  downloadBlob(blob, `nowmilao-backup-${todayISO()}.json`);
+  downloadBlob(blob, `homecheck-backup-${todayISO()}.json`);
   toast('Backup exportado.');
 });
 
@@ -723,7 +770,7 @@ $('#btnExportCsv').addEventListener('click', () => {
 
   const csv = '\uFEFF' + rows.map(r => r.map(f => `"${String(f).replace(/"/g,'""')}"`).join(';')).join('\r\n');
   const blob = new Blob([csv], { type:'text/csv;charset=utf-8' });
-  downloadBlob(blob, `nowmilao-relatorio-${todayISO()}.csv`);
+  downloadBlob(blob, `homecheck-relatorio-${todayISO()}.csv`);
   toast('Relatório exportado.');
 });
 
@@ -767,6 +814,16 @@ function boot(){
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('sw.js').catch(()=>{});
     });
+  }
+
+  // O CSS já troca de tema sozinho (prefers-color-scheme), mas os gráficos são
+  // <canvas> — as cores ficam "gravadas" na criação, então precisamos redesenhar
+  // na hora em que o usuário troca claro/escuro no iOS com o app aberto.
+  if(window.matchMedia){
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    const onThemeChange = () => { if(currentView === 'view-dashboard') renderDashboard(); };
+    if(mq.addEventListener) mq.addEventListener('change', onThemeChange);
+    else if(mq.addListener) mq.addListener(onThemeChange); // fallback p/ Safari mais antigo
   }
 }
 boot();

@@ -1,5 +1,5 @@
 // Service worker simples: cacheia o "app shell" para abrir offline depois do primeiro acesso.
-const CACHE_NAME = 'nowmilao-app-v1';
+const CACHE_NAME = 'homecheck-app-v1';
 const ASSETS = [
   './',
   './index.html',

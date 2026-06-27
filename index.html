@@ -3,14 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
-<title>Meu Apê · NOW Milão</title>
+<title>Home Check</title>
 
 <!-- PWA / iOS home screen -->
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#FDA534">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#FBE5CF">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#1B120B">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Meu Apê">
+<meta name="apple-mobile-web-app-title" content="Home Check">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" href="icons/icon-32.png">
 
@@ -34,8 +36,8 @@
     <div class="glass card countdown-card">
       <div class="ring">
         <svg width="78" height="78" viewBox="0 0 78 78">
-          <circle cx="39" cy="39" r="33" fill="none" stroke="rgba(255,255,255,.5)" stroke-width="8"/>
-          <circle id="countdownRing" cx="39" cy="39" r="33" fill="none" stroke="#F9590B" stroke-width="8" stroke-linecap="round" stroke-dasharray="207" stroke-dashoffset="207"/>
+          <circle cx="39" cy="39" r="33" fill="none" class="ring-track" stroke-width="8"/>
+          <circle id="countdownRing" cx="39" cy="39" r="33" fill="none" class="ring-progress" stroke-width="8" stroke-linecap="round" stroke-dasharray="207" stroke-dashoffset="207"/>
         </svg>
         <div class="num"><b id="daysLeftNum">–</b><small>dias</small></div>
       </div>
@@ -145,8 +147,21 @@
     <div class="glass card brand-mark">
       <img src="icons/icon-192.png" alt="ícone do app">
       <div>
-        <div class="name">Meu Apê · NOW Milão</div>
-        <div class="sub">Unidade 202F · Bloco F · Goiânia/GO</div>
+        <div class="name">Home Check</div>
+        <div class="sub">Controle de pagamentos do seu imóvel até a entrega</div>
+      </div>
+    </div>
+
+    <div class="section-title">Identificação do imóvel</div>
+    <div class="glass card">
+      <div class="field">
+        <label>Nome do imóvel (opcional)</label>
+        <input type="text" id="settingPropertyName" placeholder="Ex: Meu Apê, Casa Nova, Reserva do Lago...">
+      </div>
+      <div class="field" style="margin-bottom:0;">
+        <label>Endereço / identificação (opcional)</label>
+        <input type="text" id="settingPropertyAddress" placeholder="Ex: Unidade 12B, Bloco 2, Cidade/UF">
+        <div class="hint">Esses dados ficam só neste aparelho — não são enviados a lugar nenhum.</div>
       </div>
     </div>
 
@@ -162,7 +177,7 @@
       </div>
       <div class="field" style="margin-bottom:0;">
         <label>Valor total do contrato (referência)</label>
-        <input type="number" inputmode="decimal" step="0.01" id="settingPropertyValue">
+        <input type="number" inputmode="decimal" step="0.01" placeholder="0,00" id="settingPropertyValue">
         <div class="hint">Usado só como referência — os valores reais têm reajuste mensal (INCC/IPCA) e podem variar.</div>
       </div>
     </div>
@@ -195,7 +210,7 @@
         Faça backups periódicos em <b>Exportar backup</b> para não perder seus lançamentos se limpar os dados do Safari
         ou trocar de celular. No fim da obra, use <b>Exportar relatório</b> para gerar a planilha completa do que foi pago.
       </p>
-      <p style="font-size:11.5px; color:var(--ink-500); margin-top:10px;">v1.0 · feito para acompanhar o NOW Milão 2ª Fase</p>
+      <p style="font-size:11.5px; color:var(--ink-500); margin-top:10px;">Home Check v1.0</p>
     </div>
   </section>
 

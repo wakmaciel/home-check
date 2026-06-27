@@ -1,7 +1,7 @@
 {
-  "name": "Meu Apê · Finanças NOW Milão",
-  "short_name": "Meu Apê",
-  "description": "Controle de pagamentos e despesas do apartamento NOW Milão 2ª Fase até a entrega das chaves.",
+  "name": "Home Check",
+  "short_name": "Home Check",
+  "description": "Controle de pagamentos e despesas do seu imóvel comprado na planta até a entrega das chaves.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
