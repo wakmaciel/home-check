@@ -50,17 +50,22 @@
     </div>
 
     <div class="glass card liquid-wrap">
-      <div class="liquid-tank">
-        <div class="fill" id="liquidFill">
-          <svg class="wave1" viewBox="0 0 200 24" preserveAspectRatio="none">
-            <path d="M0 14 Q 25 2, 50 14 T 100 14 T 150 14 T 200 14 V24 H0 Z" fill="#FB8A1E"/>
-          </svg>
-          <svg class="wave2" viewBox="0 0 200 24" preserveAspectRatio="none">
-            <path d="M0 16 Q 25 6, 50 16 T 100 16 T 150 16 T 200 16 V24 H0 Z" fill="#E04400"/>
-          </svg>
-          <div class="body-fill" style="background:#F9590B;"></div>
+      <div class="tank-col">
+        <div class="liquid-tank">
+          <div class="fill" id="liquidFill">
+            <svg class="wave1" viewBox="0 0 200 24" preserveAspectRatio="none">
+              <path d="M0 14 Q 25 2, 50 14 T 100 14 T 150 14 T 200 14 V24 H0 Z" fill="#FB8A1E"/>
+            </svg>
+            <svg class="wave2" viewBox="0 0 200 24" preserveAspectRatio="none">
+              <path d="M0 16 Q 25 6, 50 16 T 100 16 T 150 16 T 200 16 V24 H0 Z" fill="#E04400"/>
+            </svg>
+            <div class="body-fill" style="background:#F9590B;"></div>
+          </div>
         </div>
-        <div class="pct"><span class="num" id="pctPaidNum">0%</span><span class="lbl">do valor<br>contratado</span></div>
+        <div class="tank-caption">
+          <span class="tank-pct" id="pctPaidNum">0%</span>
+          <span class="tank-pct-lbl">do contratado</span>
+        </div>
       </div>
       <div style="flex:1; display:flex; flex-direction:column; gap:10px;">
         <div>
@@ -144,16 +149,20 @@
       </div>
     </div>
 
-    <div class="glass card brand-mark">
+    <div class="glass card brand-mark" id="brandMarkCard" style="cursor:pointer;">
       <img src="icons/icon-192.png" alt="ícone do app">
-      <div>
-        <div class="name">Home Check</div>
-        <div class="sub">Controle de pagamentos do seu imóvel até a entrega</div>
+      <div style="flex:1; min-width:0;">
+        <div class="name" id="brandName">Home Check</div>
+        <div class="sub" id="brandSub">Controle de pagamentos do seu imóvel até a entrega</div>
       </div>
+      <button class="icon-btn" id="btnEditIdentity" aria-label="Editar identificação do imóvel" style="flex-shrink:0;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l4-1 11-11-3-3L5 16l-1 4Z"/><path d="M14 6l3 3"/></svg>
+      </button>
     </div>
 
-    <div class="section-title">Identificação do imóvel</div>
-    <div class="glass card">
+    <!-- edição: some sozinha depois que o nome/endereço já estão definidos.
+         Só reaparece se a pessoa tocar no lápis acima. -->
+    <div class="glass card" id="identityEditCard" style="display:none;">
       <div class="field">
         <label>Nome do imóvel (opcional)</label>
         <input type="text" id="settingPropertyName" placeholder="Ex: Meu Apê, Casa Nova, Reserva do Lago...">
@@ -163,6 +172,7 @@
         <input type="text" id="settingPropertyAddress" placeholder="Ex: Unidade 12B, Bloco 2, Cidade/UF">
         <div class="hint">Esses dados ficam só neste aparelho — não são enviados a lugar nenhum.</div>
       </div>
+      <button class="btn btn-primary btn-block" id="btnDoneIdentity" style="margin-top:14px;">Concluir</button>
     </div>
 
     <div class="section-title">Dados do imóvel</div>

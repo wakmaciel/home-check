@@ -701,19 +701,43 @@ function renderSettings(){
   $('#settingDeliveryDate').value = state.settings.deliveryDate;
   $('#settingPurchaseDate').value = state.settings.purchaseDate;
   $('#settingPropertyValue').value = state.settings.propertyValue ?? '';
+  renderBrandMark();
+  renderIdentitySection();
 }
 
-function bindSettingInput(id, key, isNumber){
+function renderBrandMark(){
+  const name = state.settings.propertyName ? `Home Check · ${state.settings.propertyName}` : 'Home Check';
+  const sub = state.settings.propertyAddress || 'Controle de pagamentos do seu imóvel até a entrega';
+  $('#brandName').textContent = name;
+  $('#brandSub').textContent = sub;
+}
+
+// Antes de a pessoa preencher nome/endereço, o formulário fica aberto (primeiro
+// uso). Depois de preenchido, ele some — o cartão "Home Check" já mostra tudo,
+// e só volta a abrir se a pessoa tocar no lápis (ou no próprio cartão).
+let editingPropertyInfo = false;
+function renderIdentitySection(){
+  const hasIdentity = !!(state.settings.propertyName || state.settings.propertyAddress);
+  const showEditCard = !hasIdentity || editingPropertyInfo;
+  $('#identityEditCard').style.display = showEditCard ? 'block' : 'none';
+}
+function openIdentityEditor(){ editingPropertyInfo = true; renderIdentitySection(); }
+$('#brandMarkCard').addEventListener('click', openIdentityEditor);
+$('#btnEditIdentity').addEventListener('click', (ev) => { ev.stopPropagation(); openIdentityEditor(); });
+$('#btnDoneIdentity').addEventListener('click', () => { editingPropertyInfo = false; renderIdentitySection(); });
+
+function bindSettingInput(id, key, isNumber, onAfter){
   $('#'+id).addEventListener('change', (ev) => {
     let v = ev.target.value;
     if(isNumber) v = v === '' ? null : (parseFloat(v) || 0);
     state.settings[key] = v;
     saveState();
     toast('Ajuste salvo.');
+    if(onAfter) onAfter();
   });
 }
-bindSettingInput('settingPropertyName', 'propertyName', false);
-bindSettingInput('settingPropertyAddress', 'propertyAddress', false);
+bindSettingInput('settingPropertyName', 'propertyName', false, renderBrandMark);
+bindSettingInput('settingPropertyAddress', 'propertyAddress', false, renderBrandMark);
 bindSettingInput('settingDeliveryDate', 'deliveryDate', false);
 bindSettingInput('settingPurchaseDate', 'purchaseDate', false);
 bindSettingInput('settingPropertyValue', 'propertyValue', true);
