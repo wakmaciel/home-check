@@ -340,7 +340,7 @@ function renderChartByCategory(stats){
 
   if(cats.length === 0){
     $('#legendByCategory').innerHTML = '<span class="hint">Nenhum pagamento lançado ainda.</span>';
-    charts.byCategory = new Chart(ctx, { type:'doughnut', data:{ labels:['Sem dados'], datasets:[{data:[1], backgroundColor:[theme.mutedFill]}] }, options:{ plugins:{ legend:{display:false}, tooltip:{enabled:false} }, cutout:'68%' } });
+    charts.byCategory = new Chart(ctx, { type:'doughnut', data:{ labels:['Sem dados'], datasets:[{data:[1], backgroundColor:[theme.mutedFill]}] }, options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false}, tooltip:{enabled:false} }, cutout:'68%' } });
     return;
   }
 
@@ -348,6 +348,7 @@ function renderChartByCategory(stats){
     type: 'doughnut',
     data: { labels, datasets:[{ data, backgroundColor:colors, borderWidth:2, borderColor:theme.sliceBorder }] },
     options: {
+      responsive:true, maintainAspectRatio:false,
       cutout:'68%',
       plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label: c => `${c.label}: ${money(c.raw)}` } } }
     }
@@ -380,6 +381,7 @@ function renderChartTimeline(stats){
       ]
     },
     options:{
+      responsive:true, maintainAspectRatio:false,
       interaction:{ mode:'index', intersect:false },
       plugins:{ legend:{ position:'bottom', labels:{ boxWidth:10, font:{size:11}, color: theme.text } }, tooltip:{ callbacks:{ label: c => `${c.dataset.label}: ${money(c.raw)}` } } },
       scales:{
@@ -397,7 +399,7 @@ function renderChartBars(stats){
   if(charts.bars) charts.bars.destroy();
 
   if(cats.length === 0){
-    charts.bars = new Chart(ctx, { type:'bar', data:{labels:[], datasets:[]}, options:{} });
+    charts.bars = new Chart(ctx, { type:'bar', data:{labels:[], datasets:[]}, options:{ responsive:true, maintainAspectRatio:false } });
     return;
   }
 
@@ -411,6 +413,7 @@ function renderChartBars(stats){
       ]
     },
     options:{
+      responsive:true, maintainAspectRatio:false,
       indexAxis:'y',
       plugins:{ legend:{ position:'bottom', labels:{ boxWidth:10, font:{size:11}, color: theme.text } }, tooltip:{ callbacks:{ label: c => `${c.dataset.label}: ${money(c.raw)}` } } },
       scales:{
@@ -723,6 +726,9 @@ function renderIdentitySection(){
 }
 function openIdentityEditor(){ editingPropertyInfo = true; renderIdentitySection(); }
 $('#brandMarkCard').addEventListener('click', openIdentityEditor);
+$('#cardChartByCategory').addEventListener('click', () => switchView('view-categories'));
+$('#cardChartBars').addEventListener('click', () => switchView('view-categories'));
+$('#cardChartTimeline').addEventListener('click', () => switchView('view-entries'));
 $('#btnEditIdentity').addEventListener('click', (ev) => { ev.stopPropagation(); openIdentityEditor(); });
 $('#btnDoneIdentity').addEventListener('click', () => { editingPropertyInfo = false; renderIdentitySection(); });
 
