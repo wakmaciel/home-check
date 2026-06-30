@@ -1,5 +1,6 @@
 // Service worker simples: cacheia o "app shell" para abrir offline depois do primeiro acesso.
-const CACHE_NAME = 'homecheck-app-v1';
+// ⚠️ BUILD_VERSION é substituído automaticamente pelo GitHub Actions a cada deploy.
+const CACHE_NAME = 'homecheck-app-__BUILD_VERSION__';
 const ASSETS = [
   './',
   './index.html',
