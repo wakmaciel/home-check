@@ -50,24 +50,26 @@
     </div>
 
     <div class="glass card liquid-wrap">
-      <div class="tank-col">
-        <div class="liquid-tank">
-          <div class="fill" id="liquidFill">
-            <svg class="wave1" viewBox="0 0 200 24" preserveAspectRatio="none">
-              <path d="M0 14 Q 25 2, 50 14 T 100 14 T 150 14 T 200 14 V24 H0 Z" fill="#FB8A1E"/>
-            </svg>
-            <svg class="wave2" viewBox="0 0 200 24" preserveAspectRatio="none">
-              <path d="M0 16 Q 25 6, 50 16 T 100 16 T 150 16 T 200 16 V24 H0 Z" fill="#E04400"/>
-            </svg>
-            <div class="body-fill" style="background:#F9590B;"></div>
+      <div class="liquid-tank">
+        <div class="tank-text tank-text-under" aria-hidden="true">
+          <span class="tank-pct tank-pct-value">0%</span>
+          <span class="tank-pct-lbl">pago</span>
+        </div>
+        <div class="fill" id="liquidFill">
+          <svg class="wave1" viewBox="0 0 200 26" preserveAspectRatio="none">
+            <path d="M0 16 Q 25 4, 50 16 T 100 16 T 150 16 T 200 16 V26 H0 Z" fill="#FB8A1E"/>
+          </svg>
+          <svg class="wave2" viewBox="0 0 200 26" preserveAspectRatio="none">
+            <path d="M0 18 Q 25 8, 50 18 T 100 18 T 150 18 T 200 18 V26 H0 Z" fill="#E04400"/>
+          </svg>
+          <div class="body-fill"></div>
+          <div class="tank-text tank-text-over">
+            <span class="tank-pct tank-pct-value">0%</span>
+            <span class="tank-pct-lbl">pago</span>
           </div>
         </div>
-        <div class="tank-caption">
-          <span class="tank-pct" id="pctPaidNum">0%</span>
-          <span class="tank-pct-lbl">do contratado</span>
-        </div>
       </div>
-      <div style="flex:1; display:flex; flex-direction:column; gap:10px;">
+      <div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:10px;">
         <div>
           <div class="stat-label">Total pago até hoje</div>
           <div class="stat-value big" id="totalPaidNum">R$ 0,00</div>
