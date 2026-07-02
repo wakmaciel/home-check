@@ -195,16 +195,16 @@ input,select,textarea{ font-family: inherit; }
   font-family: var(--font-display); font-weight:800; letter-spacing:-0.02em;
   font-variant-numeric: tabular-nums; font-feature-settings: "tnum";
   color: var(--ink-900);
+  overflow-wrap:break-word;
 }
-.stat-value.big{ font-size:30px; }
-.stat-value.huge{ font-size:42px; }
+.stat-value.big{ font-size: clamp(19px, 5.8vw, 30px); }
+.stat-value.huge{ font-size: clamp(26px, 8vw, 42px); }
 .stat-sub{ font-size:12px; color: var(--ink-500); margin-top:2px; }
 .stat-value.good{ color: var(--good); }
 .stat-value.bad{ color: var(--bad); }
 
 /* ---------- tanque líquido (elemento-assinatura) ---------- */
 .liquid-wrap{ display:flex; align-items:center; gap:18px; }
-.tank-col{ display:flex; flex-direction:column; align-items:center; gap:9px; }
 .liquid-tank{
   position:relative; width:108px; height:108px; min-width:108px;
   border-radius: 32px; overflow:hidden;
@@ -221,25 +221,39 @@ input,select,textarea{ font-family: inherit; }
 }
 .liquid-tank .fill{
   position:absolute; left:-25%; right:-25%; bottom:0; height:0%;
+  overflow:hidden;
   transition: height 1.1s cubic-bezier(.22,1,.36,1);
 }
-.liquid-tank .fill svg{ display:block; width:200%; }
-.liquid-tank .wave1{ position:absolute; bottom:0; left:0; width:200%; height:26px; }
-.liquid-tank .wave2{ position:absolute; bottom:0; left:0; width:200%; height:20px; opacity:.7; }
-.liquid-tank .body-fill{ position:absolute; bottom:0; left:0; right:0; top:18px; }
+/* a onda ocupa o topo do preenchimento (com a base do SVG já colorida até
+   y=26, "mergulhada" no líquido) e o corpo sólido cobre o restante por
+   baixo — assim a crista sempre fica visível na superfície, em vez de
+   escondida atrás de uma camada opaca por cima, como acontecia antes. */
+.liquid-tank .fill svg{ position:absolute; top:0; left:0; width:200%; height:26px; display:block; }
+.liquid-tank .wave2{ opacity:.65; }
+.liquid-tank .body-fill{ position:absolute; left:0; right:0; top:20px; bottom:0; background:#F9590B; }
 @media (prefers-reduced-motion: no-preference){
   .liquid-tank .wave1{ animation: waveMove 6.5s linear infinite; }
   .liquid-tank .wave2{ animation: waveMove 4.2s linear infinite reverse; }
 }
 @keyframes waveMove{ from{ transform: translateX(0); } to{ transform: translateX(-50%); } }
 
-/* O número fica FORA do tanque, numa legenda comum sobre o fundo do cartão —
-   o mesmo tratamento de texto usado em "Total pago", "Previsto" etc., que já
-   funciona perfeitamente nos dois temas. Assim o tanque pode ter qualquer cor
-   de líquido sem nunca brigar com a legibilidade do número. */
-.tank-caption{ display:flex; flex-direction:column; align-items:center; text-align:center; }
-.tank-pct{ font-family:var(--font-display); font-weight:800; font-size:19px; line-height:1; color:var(--ink-900); }
-.tank-pct-lbl{ font-size:9.5px; font-weight:700; color:var(--ink-500); text-transform:uppercase; letter-spacing:.04em; margin-top:2px; }
+/* Número dentro do tanque, em duas camadas sobrepostas na mesma posição:
+   uma escura (visível sobre o fundo claro, "no ar") e uma clara (visível
+   sobre o líquido, "submersa"). A camada clara vive dentro de #liquidFill,
+   que já é recortado (overflow:hidden) pela própria altura do líquido —
+   então ela só aparece na parte que estiver coberta pela água, garantindo
+   contraste em qualquer nível de preenchimento, sem depender do tema. */
+.tank-text{
+  position:absolute; left:50%; bottom:37px; transform:translateX(-50%);
+  width:92px; display:flex; flex-direction:column; align-items:center; text-align:center;
+  pointer-events:none;
+}
+.tank-text .tank-pct{ font-family:var(--font-display); font-weight:800; font-size:19px; line-height:1; white-space:nowrap; }
+.tank-text .tank-pct-lbl{ font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; margin-top:2px; white-space:nowrap; }
+.tank-text-under{ color: var(--ink-900); text-shadow: 0 1px 6px rgba(255,255,255,.5); }
+.tank-text-under .tank-pct-lbl{ color: var(--ink-500); }
+.tank-text-over{ color:#FFF8F0; text-shadow: 0 1px 4px rgba(120,40,0,.45); }
+.tank-text-over .tank-pct-lbl{ color: rgba(255,248,240,.85); }
 
 /* ---------- barra de progresso ---------- */
 .progress-track{ height:10px; border-radius:99px; background: rgba(255,255,255,.45); overflow:hidden; border:1px solid rgba(255,255,255,.6); }

@@ -276,7 +276,7 @@ function renderDashboard(){
   const totalRefForPct = totalRefRaw || 1;
   const pct = clamp(stats.totalPaid / totalRefForPct, 0, 1.3);
   $('#liquidFill').style.height = Math.min(pct,1)*100 + '%';
-  $('#pctPaidNum').textContent = Math.round(pct*100) + '%';
+  $$('.tank-pct-value').forEach(el => el.textContent = Math.round(pct*100) + '%');
 
   $('#totalPaidNum').textContent = money(stats.totalPaid);
   const diffEl = $('#totalDiffNum');
