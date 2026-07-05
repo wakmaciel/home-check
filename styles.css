@@ -53,9 +53,12 @@
   --radius-lg: 22px;
   --radius-md: 16px;
   --radius-sm: 12px;
-  --tabbar-h: 86px;
+  --tabbar-h: 64px;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
+  /* Distância da dock até a borda: em iPhones com home indicator (safe-bottom
+     ~34px) ela desce para perto do indicador; sem indicador fica em 10px. */
+  --tabbar-bottom: max(10px, calc(var(--safe-bottom) - 12px));
 }
 
 /* ===================================================================
@@ -152,7 +155,7 @@ input,select,textarea{ font-family: inherit; }
   position:relative;
   min-height:100vh;
   padding-top: calc(var(--safe-top) + 18px);
-  padding-bottom: calc(var(--tabbar-h) + var(--safe-bottom) + 18px);
+  padding-bottom: calc(var(--tabbar-h) + var(--tabbar-bottom) + 24px);
 }
 .view{ display:none; padding: 0 18px; animation: viewIn .35s ease; }
 .view.active{ display:block; }
@@ -290,7 +293,7 @@ input,select,textarea{ font-family: inherit; }
 .icon-btn:active{ transform: scale(.92); }
 
 .fab{
-  position:fixed; right:20px; bottom: calc(var(--tabbar-h) + var(--safe-bottom) + 18px);
+  position:fixed; right:20px; bottom: calc(var(--tabbar-h) + var(--tabbar-bottom) + 16px);
   width:60px; height:60px; border-radius:22px; z-index:30;
   background: linear-gradient(155deg, var(--amber-400), var(--ember-700));
   box-shadow: 0 14px 26px rgba(216,68,0,.45), inset 0 1px 0 rgba(255,255,255,.55);
@@ -301,25 +304,25 @@ input,select,textarea{ font-family: inherit; }
 
 /* ---------- tab bar ---------- */
 .tabbar{
-  position:fixed; left:14px; right:14px; bottom: calc(14px + var(--safe-bottom)); z-index:40;
-  height: 64px; border-radius: 26px;
+  position:fixed; left:16px; right:16px; bottom: var(--tabbar-bottom); z-index:40;
+  height: var(--tabbar-h); border-radius: 32px;
   background: var(--glass-fill-strong);
   border:1px solid var(--glass-border);
   backdrop-filter: blur(26px) saturate(180%);
   -webkit-backdrop-filter: blur(26px) saturate(180%);
-  box-shadow: 0 12px 30px rgba(120,52,0,.25), inset 0 1px 0 var(--glass-shine);
+  box-shadow: 0 16px 36px rgba(120,52,0,.30), 0 2px 8px rgba(120,52,0,.12), inset 0 1px 0 var(--glass-shine);
   display:flex; align-items:center; justify-content:space-around;
   padding: 6px;
 }
 .tab-btn{
   flex:1; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px;
-  background:none; border:none; cursor:pointer; color: var(--ink-700); border-radius:20px; position:relative;
+  background:none; border:none; cursor:pointer; color: var(--ink-700); border-radius:26px; position:relative;
 }
 .tab-btn svg{ width:23px; height:23px; }
 .tab-btn span{ font-size:10.5px; font-weight:700; }
 .tab-btn.active{ color: var(--ember-700); }
 .tab-btn.active::before{
-  content:''; position:absolute; inset:2px; border-radius:18px;
+  content:''; position:absolute; inset:2px; border-radius:24px;
   background: linear-gradient(160deg, rgba(255,255,255,.85), rgba(255,170,80,.35));
   z-index:-1;
 }
@@ -402,7 +405,7 @@ input,select,textarea{ font-family: inherit; }
 
 /* ---------- toast ---------- */
 .toast{
-  position:fixed; left:50%; bottom: calc(var(--tabbar-h) + var(--safe-bottom) + 26px); transform: translateX(-50%) translateY(20px);
+  position:fixed; left:50%; bottom: calc(var(--tabbar-h) + var(--tabbar-bottom) + 24px); transform: translateX(-50%) translateY(20px);
   background: var(--toast-bg); color: var(--toast-fg); padding:12px 20px; border-radius:16px; font-size:13.5px; font-weight:600;
   z-index:100; opacity:0; transition: opacity .25s ease, transform .25s ease; box-shadow:0 10px 24px rgba(0,0,0,.25);
   max-width:86%; text-align:center;
