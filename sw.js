@@ -14,7 +14,13 @@ const ASSETS = [
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS)).catch(() => {})
+    caches.open(CACHE_NAME).then((cache) =>
+      // cache: 'reload' força buscar da rede, ignorando o cache HTTP do GitHub Pages
+      // (max-age=600) — senão a versão "nova" seria populada com arquivos velhos.
+      cache.addAll(ASSETS.map((url) => new Request(url, { cache: 'reload' })))
+    )
+    // sem .catch(): se o download falhar, o install falha e o navegador
+    // tenta de novo depois, em vez de ativar uma versão com cache incompleto.
   );
   self.skipWaiting();
 });

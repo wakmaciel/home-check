@@ -866,7 +866,13 @@ function boot(){
 
   if('serviceWorker' in navigator){
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('sw.js').catch(()=>{});
+      navigator.serviceWorker.register('sw.js').then((reg) => {
+        // iOS mantém o PWA suspenso e quase nunca rechecar o sw.js sozinho.
+        // Forçamos a checagem sempre que o app volta ao primeiro plano.
+        document.addEventListener('visibilitychange', () => {
+          if(document.visibilityState === 'visible') reg.update().catch(()=>{});
+        });
+      }).catch(()=>{});
     });
 
     let refreshing = false;
