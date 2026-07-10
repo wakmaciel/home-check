@@ -88,6 +88,22 @@ const $$ = (sel, p=document) => Array.from(p.querySelectorAll(sel));
 
 const BRL = new Intl.NumberFormat('pt-BR', { style:'currency', currency:'BRL' });
 function money(v){ return BRL.format(v||0); }
+
+/* Máscara de moeda nos inputs: a pessoa digita só números e o campo vai
+   formatando como centavos ("15000" → "150,00"), estilo app de banco. */
+const BRL_PLAIN = new Intl.NumberFormat('pt-BR', { minimumFractionDigits:2, maximumFractionDigits:2 });
+function maskMoneyInput(el){
+  const digits = el.value.replace(/\D/g,'').slice(0,13);
+  el.value = digits ? BRL_PLAIN.format(parseInt(digits,10)/100) : '';
+}
+function moneyInputValue(el){
+  const digits = el.value.replace(/\D/g,'');
+  return digits ? parseInt(digits,10)/100 : NaN;
+}
+function setMoneyInput(el, v){
+  el.value = (v === null || v === undefined || v === '' || isNaN(Number(v))) ? '' : BRL_PLAIN.format(Number(v));
+}
+$$('.money-input').forEach(el => el.addEventListener('input', () => maskMoneyInput(el)));
 function fmtDate(iso){
   if(!iso) return '—';
   const d = parseISO(iso);
@@ -350,12 +366,16 @@ function renderChartByCategory(stats){
     options: {
       responsive:true, maintainAspectRatio:false,
       cutout:'68%',
-      plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label: c => `${c.label}: ${money(c.raw)}` } } }
+      plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label: c => {
+        const tot = c.dataset.data.reduce((s,v)=>s+v,0) || 1;
+        return `${c.label}: ${money(c.raw)} (${Math.round(c.raw/tot*100)}%)`;
+      } } } }
     }
   });
 
+  const totalPaid = data.reduce((s,v)=>s+v, 0) || 1;
   $('#legendByCategory').innerHTML = cats.map((c,i)=>
-    `<span class="legend-item"><span class="legend-dot" style="background:${colors[i]}"></span>${c.name}</span>`
+    `<span class="legend-item"><span class="legend-dot" style="background:${colors[i]}"></span>${c.name} · <b>${money(data[i])}</b> (${Math.round(data[i]/totalPaid*100)}%)</span>`
   ).join('');
 }
 
@@ -508,7 +528,7 @@ function openEntryEditor(entryId){
     const e = state.entries.find(x=>x.id===entryId);
     $('#entryCategory').value = e.categoryId;
     $('#entryDate').value = e.date;
-    $('#entryValue').value = e.value;
+    setMoneyInput($('#entryValue'), e.value);
     $('#entryMethod').value = e.method || 'PIX';
     $('#entryNote').value = e.note || '';
   } else {
@@ -524,7 +544,7 @@ function openEntryEditor(entryId){
 $('#btnSaveEntry').addEventListener('click', () => {
   const categoryId = $('#entryCategory').value;
   const date = $('#entryDate').value;
-  const value = parseFloat($('#entryValue').value);
+  const value = moneyInputValue($('#entryValue'));
   if(!categoryId || !date || isNaN(value) || value <= 0){
     toast('Preencha categoria, data e um valor válido.');
     return;
@@ -623,7 +643,7 @@ function openCategoryEditor(categoryId){
     const c = categoryById(categoryId);
     $('#categoryName').value = c.name;
     $('#categoryGroup').value = c.group;
-    $('#categoryRef').value = c.referenceValue ?? '';
+    setMoneyInput($('#categoryRef'), c.referenceValue);
     $('#categoryDue').value = c.dueDate || '';
     $('#categoryNote').value = c.note || '';
     categoryModeSelected = c.mode || 'pendente';
@@ -659,7 +679,8 @@ $('#btnSaveCategory').addEventListener('click', () => {
   if(!name){ toast('Dê um nome para a categoria.'); return; }
   const id = $('#categoryId').value;
   const group = $('#categoryGroup').value;
-  const referenceValue = $('#categoryRef').value === '' ? null : parseFloat($('#categoryRef').value);
+  const refParsed = moneyInputValue($('#categoryRef'));
+  const referenceValue = isNaN(refParsed) ? null : refParsed;
   const dueDate = $('#categoryDue').value || null;
   const note = $('#categoryNote').value.trim();
 
@@ -703,7 +724,7 @@ function renderSettings(){
   $('#settingPropertyAddress').value = state.settings.propertyAddress || '';
   $('#settingDeliveryDate').value = state.settings.deliveryDate;
   $('#settingPurchaseDate').value = state.settings.purchaseDate;
-  $('#settingPropertyValue').value = state.settings.propertyValue ?? '';
+  setMoneyInput($('#settingPropertyValue'), state.settings.propertyValue);
   renderBrandMark();
   renderIdentitySection();
 }
@@ -726,16 +747,19 @@ function renderIdentitySection(){
 }
 function openIdentityEditor(){ editingPropertyInfo = true; renderIdentitySection(); }
 $('#brandMarkCard').addEventListener('click', openIdentityEditor);
-$('#cardChartByCategory').addEventListener('click', () => switchView('view-categories'));
-$('#cardChartBars').addEventListener('click', () => switchView('view-categories'));
-$('#cardChartTimeline').addEventListener('click', () => switchView('view-entries'));
+// O card do gráfico NÃO navega mais no toque — tocar nas fatias/pontos mostra o
+// tooltip com os valores. Quem quiser ir pra aba usa o link do cabeçalho.
+$$('.chart-link').forEach(b => b.addEventListener('click', () => switchView(b.dataset.goto)));
 $('#btnEditIdentity').addEventListener('click', (ev) => { ev.stopPropagation(); openIdentityEditor(); });
 $('#btnDoneIdentity').addEventListener('click', () => { editingPropertyInfo = false; renderIdentitySection(); });
 
 function bindSettingInput(id, key, isNumber, onAfter){
   $('#'+id).addEventListener('change', (ev) => {
     let v = ev.target.value;
-    if(isNumber) v = v === '' ? null : (parseFloat(v) || 0);
+    if(isNumber){
+      const n = moneyInputValue(ev.target);
+      v = isNaN(n) ? null : n;
+    }
     state.settings[key] = v;
     saveState();
     toast('Ajuste salvo.');

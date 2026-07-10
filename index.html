@@ -87,19 +87,28 @@
 
     <div class="section-title">Visão geral</div>
 
-    <div class="glass card chart-card" id="cardChartByCategory" style="cursor:pointer;">
-      <h3>Pago por categoria</h3>
+    <div class="glass card chart-card" id="cardChartByCategory">
+      <div class="chart-head">
+        <h3>Pago por categoria</h3>
+        <button type="button" class="chart-link" data-goto="view-categories">Categorias ›</button>
+      </div>
       <div class="chart-box"><canvas id="chartByCategory"></canvas></div>
       <div class="legend-list" id="legendByCategory"></div>
     </div>
 
-    <div class="glass card chart-card" id="cardChartTimeline" style="cursor:pointer;">
-      <h3>Acumulado: pago x previsto até a entrega</h3>
+    <div class="glass card chart-card" id="cardChartTimeline">
+      <div class="chart-head">
+        <h3>Acumulado: pago x previsto até a entrega</h3>
+        <button type="button" class="chart-link" data-goto="view-entries">Lançamentos ›</button>
+      </div>
       <div class="chart-box tall"><canvas id="chartTimeline"></canvas></div>
     </div>
 
-    <div class="glass card chart-card" id="cardChartBars" style="cursor:pointer;">
-      <h3>Pago x previsto por categoria</h3>
+    <div class="glass card chart-card" id="cardChartBars">
+      <div class="chart-head">
+        <h3>Pago x previsto por categoria</h3>
+        <button type="button" class="chart-link" data-goto="view-categories">Categorias ›</button>
+      </div>
       <div class="chart-box tall"><canvas id="chartBars"></canvas></div>
     </div>
 
@@ -189,7 +198,7 @@
       </div>
       <div class="field" style="margin-bottom:0;">
         <label>Valor total do contrato (referência)</label>
-        <input type="number" inputmode="decimal" step="0.01" placeholder="0,00" id="settingPropertyValue">
+        <input type="text" inputmode="numeric" autocomplete="off" class="money-input" placeholder="0,00" id="settingPropertyValue">
         <div class="hint">Usado só como referência — os valores reais têm reajuste mensal (INCC/IPCA) e podem variar.</div>
       </div>
     </div>
@@ -274,7 +283,7 @@
   </div>
   <div class="field">
     <label>Valor pago (R$)</label>
-    <input type="number" inputmode="decimal" step="0.01" placeholder="0,00" id="entryValue">
+    <input type="text" inputmode="numeric" autocomplete="off" class="money-input" placeholder="0,00" id="entryValue">
   </div>
   <div class="field">
     <label>Forma de pagamento</label>
@@ -313,7 +322,7 @@
   </div>
   <div class="field">
     <label>Valor de referência (opcional)</label>
-    <input type="number" inputmode="decimal" step="0.01" placeholder="0,00" id="categoryRef">
+    <input type="text" inputmode="numeric" autocomplete="off" class="money-input" placeholder="0,00" id="categoryRef">
   </div>
   <div class="field">
     <label>Vencimento (opcional)</label>
