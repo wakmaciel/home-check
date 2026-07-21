@@ -273,35 +273,44 @@
     <button class="icon-btn" data-close-sheet><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
   </div>
   <input type="hidden" id="entryId">
-  <div class="field">
-    <label>Categoria</label>
-    <select id="entryCategory"></select>
+  <input type="hidden" id="entryCategory">
+
+  <!-- Passo 1: primeiro escolhe a categoria -->
+  <div id="entryStepCategory">
+    <div class="section-title" style="margin:4px 4px 10px;">Escolha a categoria</div>
+    <div class="category-picker" id="entryCategoryPicker"></div>
   </div>
-  <div class="field">
-    <label>Data do pagamento</label>
-    <input type="date" id="entryDate">
+
+  <!-- Passo 2: demais campos, liberado só depois da categoria -->
+  <div id="entryStepDetails" style="display:none;">
+    <button type="button" class="category-chip" id="entryCategoryChip"></button>
+    <div class="field">
+      <label>Data do pagamento</label>
+      <input type="date" id="entryDate">
+    </div>
+    <div class="field">
+      <label>Valor pago (R$)</label>
+      <input type="text" inputmode="numeric" autocomplete="off" class="money-input" placeholder="0,00" id="entryValue">
+    </div>
+    <div class="field">
+      <label>Forma de pagamento</label>
+      <select id="entryMethod">
+        <option value="PIX">PIX</option>
+        <option value="Boleto">Boleto</option>
+        <option value="Transferência">Transferência</option>
+        <option value="Débito em conta">Débito em conta</option>
+        <option value="Cartão">Cartão</option>
+        <option value="Dinheiro">Dinheiro</option>
+        <option value="Outro">Outro</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Observação (opcional)</label>
+      <textarea id="entryNote" rows="2" placeholder="Ex: parcela 4/13, paguei com 2 dias de atraso..."></textarea>
+    </div>
+    <button class="btn btn-primary btn-block" id="btnSaveEntry">Salvar lançamento</button>
+    <button class="btn btn-danger btn-block" id="btnDeleteEntry" style="margin-top:10px; display:none;">Excluir lançamento</button>
   </div>
-  <div class="field">
-    <label>Valor pago (R$)</label>
-    <input type="text" inputmode="numeric" autocomplete="off" class="money-input" placeholder="0,00" id="entryValue">
-  </div>
-  <div class="field">
-    <label>Forma de pagamento</label>
-    <select id="entryMethod">
-      <option value="PIX">PIX</option>
-      <option value="Boleto">Boleto</option>
-      <option value="Transferência">Transferência</option>
-      <option value="Cartão">Cartão</option>
-      <option value="Dinheiro">Dinheiro</option>
-      <option value="Outro">Outro</option>
-    </select>
-  </div>
-  <div class="field">
-    <label>Observação (opcional)</label>
-    <textarea id="entryNote" rows="2" placeholder="Ex: parcela 4/13, paguei com 2 dias de atraso..."></textarea>
-  </div>
-  <button class="btn btn-primary btn-block" id="btnSaveEntry">Salvar lançamento</button>
-  <button class="btn btn-danger btn-block" id="btnDeleteEntry" style="margin-top:10px; display:none;">Excluir lançamento</button>
 </div>
 
 <!-- Sheet: nova/editar categoria -->

@@ -43,6 +43,11 @@
   --chart-slice-border: var(--cream);
   --ring-track:         rgba(255,255,255,.5);
 
+  /* dock: realce plano (sem gradiente branco) atrás do ícone ativo, pra não
+     parecer um adesivo "flutuando" solto sobre o vidro no modo claro */
+  --tab-active-fill:  rgba(240,110,20,.14);
+  --tab-active-ring:  rgba(240,110,20,.16);
+
   /* tipografia */
   --font-display: ui-rounded, "SF Pro Rounded", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
   --font-body:    -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
@@ -100,6 +105,9 @@
     --chart-muted-fill:   rgba(255,255,255,.16);
     --chart-planned-line: #D9B68C;
     --ring-track:         rgba(255,255,255,.14);
+
+    --tab-active-fill:  rgba(255,138,45,.20);
+    --tab-active-ring:  rgba(255,138,45,.22);
   }
 }
 
@@ -305,30 +313,36 @@ input,select,textarea{ font-family: inherit; }
 /* ---------- tab bar ---------- */
 .tabbar{
   position:fixed; left:16px; right:16px; bottom: var(--tabbar-bottom); z-index:40;
-  height: var(--tabbar-h); border-radius: 32px;
+  height: var(--tabbar-h); border-radius: 999px;
   background: var(--glass-fill-strong);
   border:1px solid var(--glass-border);
-  backdrop-filter: blur(26px) saturate(180%);
-  -webkit-backdrop-filter: blur(26px) saturate(180%);
-  box-shadow: 0 16px 36px rgba(120,52,0,.30), 0 2px 8px rgba(120,52,0,.12), inset 0 1px 0 var(--glass-shine);
+  backdrop-filter: blur(30px) saturate(180%);
+  -webkit-backdrop-filter: blur(30px) saturate(180%);
+  box-shadow: 0 8px 24px rgba(120,52,0,.14), 0 1px 3px rgba(120,52,0,.08), inset 0 1px 0 var(--glass-shine);
   display:flex; align-items:center; justify-content:space-around;
   padding: 6px;
 }
 .tab-btn{
-  flex:1; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px;
-  background:none; border:none; cursor:pointer; color: var(--ink-700); border-radius:26px; position:relative;
+  flex:1; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;
+  background:none; border:none; cursor:pointer; color: var(--ink-500); position:relative;
+  transition: color .2s ease;
 }
-.tab-btn svg{ width:23px; height:23px; }
-.tab-btn span{ font-size:10.5px; font-weight:700; }
+.tab-btn svg{ position:relative; z-index:1; width:22px; height:22px; transition: transform .25s cubic-bezier(.34,1.5,.6,1); }
+.tab-btn span{ position:relative; z-index:1; font-size:10px; font-weight:700; letter-spacing:.01em; }
 .tab-btn.active{ color: var(--ember-700); }
-.tab-btn.active::before{
-  content:''; position:absolute; inset:2px; border-radius:24px;
-  background: linear-gradient(160deg, rgba(255,255,255,.85), rgba(255,170,80,.35));
-  z-index:-1;
+.tab-btn.active svg{ transform: translateY(-1px); }
+/* pill plano só atrás do ícone (não do rótulo inteiro): fica no mesmo plano
+   do vidro em vez de parecer um adesivo branco boiando por cima dele */
+.tab-btn::before{
+  content:''; position:absolute; top:5px; left:50%; z-index:0;
+  width:44px; height:28px; border-radius:14px;
+  transform: translateX(-50%) scale(.75);
+  background: var(--tab-active-fill);
+  border: 1px solid var(--tab-active-ring);
+  opacity:0;
+  transition: opacity .2s ease, transform .25s cubic-bezier(.34,1.5,.6,1);
 }
-@media (prefers-color-scheme: dark){
-  .tab-btn.active::before{ background: linear-gradient(160deg, rgba(255,255,255,.16), rgba(255,122,30,.20)); }
-}
+.tab-btn.active::before{ opacity:1; transform: translateX(-50%) scale(1); }
 
 /* ---------- listas ---------- */
 .entry-row{
@@ -380,6 +394,37 @@ input,select,textarea{ font-family: inherit; }
   .seg{ background: rgba(255,255,255,.08); }
 }
 
+/* ---------- seletor de categoria (passo 1 do lançamento) ---------- */
+.category-picker{ padding-bottom:2px; }
+.cp-group{ margin-bottom:16px; }
+.cp-group:last-child{ margin-bottom:4px; }
+.cp-group-label{ font-size:11.5px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color: var(--ink-700); margin:0 4px 8px; }
+.cp-item{
+  display:flex; align-items:center; gap:10px; width:100%; text-align:left;
+  padding:13px 14px; border-radius:14px; border:1px solid rgba(255,255,255,.7);
+  background: rgba(255,255,255,.55); color: var(--field-text); font-size:14.5px; font-weight:600;
+  cursor:pointer; margin-bottom:8px; appearance:none;
+}
+.cp-item:last-child{ margin-bottom:0; }
+.cp-item:active{ transform: scale(.98); }
+.cp-item .dot{ width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+@media (prefers-color-scheme: dark){
+  .cp-item{ background: rgba(255,255,255,.10); border-color: rgba(255,255,255,.16); color: var(--ink-900); }
+}
+
+/* ---------- chip de categoria escolhida (passo 2 do lançamento) ---------- */
+.category-chip{
+  display:flex; align-items:center; gap:10px; width:100%; text-align:left;
+  padding:13px 14px; margin-bottom:14px; border-radius:14px;
+  background: rgba(255,255,255,.55); border:1px solid rgba(255,255,255,.7);
+  color: var(--field-text); font-size:14.5px; font-weight:700; cursor:pointer; appearance:none;
+}
+.category-chip .dot{ width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+.category-chip .chip-change{ font-size:11.5px; font-weight:700; color: var(--ember-700); flex-shrink:0; }
+@media (prefers-color-scheme: dark){
+  .category-chip{ background: rgba(255,255,255,.10); border-color: rgba(255,255,255,.16); color: var(--ink-900); }
+}
+
 /* ---------- modal / sheet ---------- */
 .sheet-backdrop{
   position:fixed; inset:0; background: rgba(58,36,16,.38); z-index:80; opacity:0; pointer-events:none;
@@ -428,9 +473,26 @@ input,select,textarea{ font-family: inherit; }
 .chart-link:active{ transform: scale(.94); }
 .chart-box{ position:relative; height:200px; }
 .chart-box.tall{ height:230px; }
-.legend-list{ display:flex; flex-wrap:wrap; gap:8px 14px; padding: 10px 6px 0; }
-.legend-item{ display:flex; align-items:center; gap:6px; font-size:11.5px; color: var(--ink-700); font-weight:600; }
-.legend-dot{ width:9px; height:9px; border-radius:50%; }
+.legend-list{ display:flex; flex-direction:column; padding: 6px 6px 0; }
+.legend-row{
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  padding:9px 0; border-bottom:1px solid rgba(255,255,255,.4);
+}
+.legend-row:last-child{ border-bottom:none; }
+.legend-name{
+  display:flex; align-items:center; gap:8px; min-width:0; flex:1;
+  font-size:13px; color: var(--ink-700); font-weight:600;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.legend-value{
+  flex-shrink:0; font-family: var(--font-mono); font-weight:700; font-size:13px;
+  color: var(--ink-900); white-space:nowrap; display:flex; align-items:baseline; gap:6px;
+}
+.legend-pct{ font-family: var(--font-body); font-weight:600; font-size:11px; color: var(--ink-500); }
+.legend-dot{ width:9px; height:9px; border-radius:50%; flex-shrink:0; }
+@media (prefers-color-scheme: dark){
+  .legend-row{ border-bottom-color: rgba(255,255,255,.08); }
+}
 
 /* ---------- countdown chip ---------- */
 .countdown-card{ display:flex; align-items:center; gap:16px; }

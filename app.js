@@ -375,7 +375,10 @@ function renderChartByCategory(stats){
 
   const totalPaid = data.reduce((s,v)=>s+v, 0) || 1;
   $('#legendByCategory').innerHTML = cats.map((c,i)=>
-    `<span class="legend-item"><span class="legend-dot" style="background:${colors[i]}"></span>${c.name} · <b>${money(data[i])}</b> (${Math.round(data[i]/totalPaid*100)}%)</span>`
+    `<div class="legend-row">
+      <span class="legend-name"><span class="legend-dot" style="background:${colors[i]}"></span>${c.name}</span>
+      <span class="legend-value">${money(data[i])} <span class="legend-pct">${Math.round(data[i]/totalPaid*100)}%</span></span>
+    </div>`
   ).join('');
 }
 
@@ -473,7 +476,6 @@ function populateCategorySelects(){
       selectEl.value = prevValue;
     }
   };
-  buildOptions($('#entryCategory'), false);
   buildOptions($('#filterCategory'), true);
 }
 
@@ -518,25 +520,75 @@ function renderEntries(){
 
 $('#filterCategory').addEventListener('change', renderEntries);
 
+// Passo 1 (categoria) só avança pro passo 2 (demais campos) depois de uma escolha.
+// Em edição, a categoria já é conhecida, então abre direto no passo 2 — mas o
+// chip permanece tocável ali pra quem quiser trocar a categoria do lançamento.
+function showEntryStep(step){
+  const showingCategory = step === 'category';
+  $('#entryStepCategory').style.display = showingCategory ? 'block' : 'none';
+  $('#entryStepDetails').style.display = showingCategory ? 'none' : 'block';
+}
+
+function setEntryCategory(categoryId){
+  $('#entryCategory').value = categoryId || '';
+  const cat = categoryId ? categoryById(categoryId) : null;
+  const chip = $('#entryCategoryChip');
+  if(cat){
+    const color = GROUP_COLORS[cat.group] || '#FB8A1E';
+    chip.innerHTML = `<span class="dot" style="background:${color}"></span><span style="flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${cat.name}</span><span class="chip-change">Trocar ›</span>`;
+  } else {
+    chip.innerHTML = `<span style="flex:1; color:var(--ink-500);">Selecionar categoria</span><span class="chip-change">›</span>`;
+  }
+}
+
+function renderEntryCategoryPicker(){
+  const picker = $('#entryCategoryPicker');
+  let html = '';
+  GROUPS.forEach(g => {
+    const cats = state.categories.filter(c => c.group === g.id);
+    if(cats.length === 0) return;
+    html += `<div class="cp-group"><div class="cp-group-label">${g.label}</div>`;
+    html += cats.map(c => `<button type="button" class="cp-item" data-id="${c.id}"><span class="dot" style="background:${GROUP_COLORS[g.id]||'#FB8A1E'}"></span>${c.name}</button>`).join('');
+    html += `</div>`;
+  });
+  if(!html){
+    html = '<div class="hint">Nenhuma categoria cadastrada ainda. Crie uma na aba Categorias.</div>';
+  }
+  picker.innerHTML = html;
+  $$('.cp-item', picker).forEach(btn => btn.addEventListener('click', () => {
+    setEntryCategory(btn.dataset.id);
+    showEntryStep('details');
+  }));
+}
+
+$('#entryCategoryChip').addEventListener('click', () => {
+  renderEntryCategoryPicker();
+  showEntryStep('category');
+});
+
 function openEntryEditor(entryId){
   const isEdit = !!entryId;
   $('#entrySheetTitle').textContent = isEdit ? 'Editar lançamento' : 'Novo lançamento';
   $('#entryId').value = entryId || '';
   $('#btnDeleteEntry').style.display = isEdit ? 'block' : 'none';
 
+  renderEntryCategoryPicker();
+
   if(isEdit){
     const e = state.entries.find(x=>x.id===entryId);
-    $('#entryCategory').value = e.categoryId;
+    setEntryCategory(e.categoryId);
     $('#entryDate').value = e.date;
     setMoneyInput($('#entryValue'), e.value);
     $('#entryMethod').value = e.method || 'PIX';
     $('#entryNote').value = e.note || '';
+    showEntryStep('details');
   } else {
     $('#entryDate').value = todayISO();
     $('#entryValue').value = '';
     $('#entryMethod').value = 'PIX';
     $('#entryNote').value = '';
-    if(state.categories.length) $('#entryCategory').value = state.categories[0].id;
+    setEntryCategory('');
+    showEntryStep('category');
   }
   openSheet('sheetEntry');
 }
